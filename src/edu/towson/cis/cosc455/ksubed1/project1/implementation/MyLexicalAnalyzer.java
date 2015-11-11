@@ -21,9 +21,9 @@ public class MyLexicalAnalyzer implements LexicalAnalyzer {
 	
 	public char nextChar = 'a';
 	
-	public MyLexicalAnalyzer(String filename){
+	public MyLexicalAnalyzer(String fileName){
 		try {
-			br = new BufferedReader(new FileReader(filename));
+			br = new BufferedReader(new FileReader(fileName));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			System.out.println("error wrong file ");
