@@ -10,21 +10,18 @@ import java.util.Queue;
 
 public class MySemanticAnalyzer {
 	/*
-	 * need queue or linked list or list
-	 * and stack
+	 need queue or linked list or list
+	 and stack
 	 */
 	
 	public Queue<String> myQueue = new LinkedList<String>(); // new queue to store the translated input
 	
 	
 	/*
-	 * to add myQueue.add(Stuff to add);
-	 * 
-	 * when reading the queue
-	 * while(myQueue.peek() != null) {
-	 *  
-	 * 		String s = myQueue.remove();
-	 * }
+	  to add myQueue.add(Stuff to add) 
+	  when reading the queue
+	  while(myQueue.peek() != null) {
+	  String s = myQueue.remove();
 	 */
 	
 	public String fileName;
@@ -32,20 +29,33 @@ public class MySemanticAnalyzer {
 	public MySemanticAnalyzer(String fileName) {
 		this.fileName = fileName;
 	}
-	
+	/**
+	 * adds html begin tag to the program queue
+	 * @param void
+	 * @return void
+	 */
 	public void markdownB() {
 		// add this to queue "<HTML>\n";
 		myQueue.add("<html>\n");
 		
 		
 	}
-	
+	/**
+	 * adds html end tag to the program queue
+	 * @param void
+	 * @return void
+	 */
 	public void markdownE() {
 		// add this to queue "<\HTML>\n";
 		myQueue.add("</HTML>");
 		createFile();
 	}
-		
+	
+	/**
+	 * creates a html file
+	 * @param void
+	 * @return void
+	 */	
 	public void createFile() {
 		
 		fileName.concat(".html");
@@ -65,7 +75,7 @@ public class MySemanticAnalyzer {
 		    
 		    openHTMLFileInBrowswer(fileName);
 		} catch (IOException ex) {
-		  // report
+		  
 		} finally {
 		   try {writer.close();} catch (Exception ex) {/*ignore*/}
 		}
@@ -75,10 +85,14 @@ public class MySemanticAnalyzer {
 		
 		
 	}
-	
+	/**
+	 * adds head and title if present
+	 * @param string text and boolean to check if there is title
+	 * @return void
+	 */
 	public void head(String s, boolean b) {
 		//String head = "<" + text + ">";
-		
+		// if title heads title heade
 		//myQueue.add(head);
 		
 		String h;
@@ -111,8 +125,8 @@ public class MySemanticAnalyzer {
 	}
 	
 	/**
-	 * simply adds the audio tag to the program queue
-	 * @param String-link for the audio file
+	 * adds the audio tag to the program queue
+	 * @param String text for the audio file
 	 * @return void
 	 */
 	public void audio(String text) {
@@ -125,7 +139,7 @@ public class MySemanticAnalyzer {
 	
 	/**
 	 * simply adds the video tag to the program queue
-	 * @param String text -> the link for the video file
+	 * @param String  link for the video file
 	 * @return void
 	 */
 	public void video(String text) {
@@ -180,7 +194,7 @@ public class MySemanticAnalyzer {
 	
 	/**
 	 * adds a paragraph
-	 * @param String s => what will be in the paragraph
+	 * @param String s paragraph stuff
 	 * @return void
 	 */
 	public void paragraph(String s) {
@@ -190,22 +204,34 @@ public class MySemanticAnalyzer {
 	
 	/**
 	 * adds list items
-	 * @param String s => list item
+	 * @param String s list items
 	 * @return void
 	 */
 	public void listItem(String s) {
 		String l = "<li>" + s + "</li>";
 		myQueue.add(l);
 	}
-	
+	/**
+	 * adds inner text
+	 * @param String s inner text
+	 * @return void
+	 */
 	public void innerText(String s) {
 		myQueue.add(s);
 	}
-	
+	/**
+	 * adds paragraph begin 
+	 *
+	 * @return void
+	 */
 	public void addParaB() {
 		myQueue.add("<p>");
 	}
-	
+	/**
+	 * adds paragraph end </p>
+	 *
+	 * @return void
+	 */
 	public void addParaE() {
 		myQueue.add("</p>");
 	}

@@ -34,6 +34,11 @@ public class MyLexicalAnalyzer implements LexicalAnalyzer {
 		
 		
 	}
+	/**
+	 * next line
+	 * @param void
+	 * @return void
+	 */
 	
 	public void nextLine() {
 		if(endOfFile) {
@@ -49,7 +54,11 @@ public class MyLexicalAnalyzer implements LexicalAnalyzer {
 		}
 	}
 	
-	@Override
+	/**
+	 * get next token ignoring spaces and lines until end
+	 * @param void
+	 * @return void
+	 */
 	public void getNextToken() {
 		currentToken = " ";
 		if(endOfLine) {
@@ -74,6 +83,7 @@ public class MyLexicalAnalyzer implements LexicalAnalyzer {
 			}
 			
 			System.out.println(currentToken + " current token");
+		
 		}
 		
 		else {
@@ -85,7 +95,12 @@ public class MyLexicalAnalyzer implements LexicalAnalyzer {
 
 	}
 
-	@Override
+	 /**
+     * Gets the character
+     *@param void
+	 *@return void
+     * 
+     */
 	public void getCharacter() {
 		if(charNum < lineS.length()) {
 			nextChar = lineS.charAt(charNum);
@@ -98,25 +113,41 @@ public class MyLexicalAnalyzer implements LexicalAnalyzer {
 
 	}
 
-	@Override
+	/**
+	 * adds character
+	 * @param void
+	 * @return void
+	 */
 	public void addCharacter() {
 		currentToken += nextChar;
 
 	}
 
-	@Override
+	/**
+	 * adds html begin tag to the program queue
+	 * @param c character
+	 * @return true if space
+	 */
 	public boolean isSpace(char c) {
 		
 		return c == ' ';
 	}
-	
+	/**
+     * skip space
+     *@param void
+     * @return void
+     */
 	public void skipSpace() {
 		while(isSpace(lineS.charAt(charNum))) {
 			charNum++;
 		}
 	}
 
-	@Override
+	 /**
+     * looks up token
+     *@param void
+     * @return true 
+     */
 	public boolean lookupToken() {
 		boolean b = true;
 		

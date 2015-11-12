@@ -9,17 +9,7 @@ public class Markdown {
 	 * @throws CompilerException
 	 */
 	public static void main(String[] args) throws CompilerException {
-		/*
-		 * create lex
-		 * create syntax
-		 * create sem
-		 * 
-		 * MySemanticAnalyzer sem = new MySemanticAnalyzer(filename.substring(0, filename.length() - 4))
-		 * 
-		 * myLexicalAnalyzer lex = new MyLexicalAnalyzer("file name")
-		 * 
-		 * mysyntax syn = new syntax(lex, sem)
-		 */
+	
 		String fileName = "/Users/swami/Desktop/COSC 455/Project 1 Test Cases/Test2.mkd";
 		
 		if(!fileName.substring(fileName.length() - 4).equals(".mkd")) {

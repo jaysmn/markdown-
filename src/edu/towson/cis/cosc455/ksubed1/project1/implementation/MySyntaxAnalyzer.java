@@ -26,11 +26,16 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 		this.lexer = lexer;
 		semantics = sem;
 	}
-	
+	/**
+     * start
+     *
+     *@throws CompilerException
+     * @return void
+     */
 	public void start() throws CompilerException {
 		lexer.getNextToken();
 		while(lexer.endOfFile == false) {
-			System.out.println(lexer.currentToken + "&&&");
+			//System.out.println(lexer.currentToken + "&&&");
 
 			// this turned in to an infinite loop
 			
@@ -112,7 +117,11 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 	}
 	
 
-	
+	/**
+     * checks to see if define or use variable
+     *@param void
+     * @return true 
+     */
 	public void variables() throws CompilerException {
 		if(lexer.currentToken.equalsIgnoreCase(Tokens.VARB)) {
 			variableDefine();
@@ -129,12 +138,12 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 	public void markdown() throws CompilerException {
 		
 		/*
-		 * if linenum == 1
-		 * #begin
-		 * semantics.mardownBegin();
-		 * else
-		 * #END
-		 * semantics.mardownEnd();
+		  if linenum == 1
+		 #begin
+		  semantics.mardownBegin();
+		  else
+		  #END
+		  semantics.mardownEnd();
 		 */
 		
 		if(lexer.currentToken.equalsIgnoreCase(Tokens.DOCB)) {
@@ -200,9 +209,7 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 		}
 		else {
 			sem.head(h, false);
-		}
-		
-		
+		}	
 		
 	}
 
