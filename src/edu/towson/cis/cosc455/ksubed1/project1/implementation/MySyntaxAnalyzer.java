@@ -6,42 +6,126 @@ import edu.towson.cis.cosc455.ksubed1.project1.interfaces.CompilerException;
 import edu.towson.cis.cosc455.ksubed1.project1.interfaces.SyntaxAnalyzer;
 
 public class MySyntaxAnalyzer implements SyntaxAnalyzer {
-// get token from lexical
+// get token from lexerical
 	// check which token it is
 	// and then call the right method
 	// markdown head= > title body while loop markdown
 	
-	String fileName = "";
-	MyLexicalAnalyzer lex = new MyLexicalAnalyzer ("file name");
-	MySemanticAnalyzer sem = new MySemanticAnalyzer(fileName.substring(0, fileName.length() - 4));
-	MySyntaxAnalyzer syn = new MySyntaxAnalyzer(lex,sem);
+	String fileName;
+	
+	MySemanticAnalyzer sem;
+	
 
 	public Stack myStack = new Stack();// Stack for variables
-	
+	public MyLexicalAnalyzer lexer;
 	
 	
 	public MySemanticAnalyzer semantics;
-	public MySyntaxAnalyzer(MyLexicalAnalyzer lex, MySemanticAnalyzer sem) {
+	public MySyntaxAnalyzer(MyLexicalAnalyzer lexer, MySemanticAnalyzer sem) {
 		// TODO Auto-generated construct
-		
+		this.lexer = lexer;
 		semantics = sem;
 	}
 	
-	
-	
-	/**
-	 * 
-	 * exits the program
-	 * @param void
-	 * @return void
-	 * @throws void
-	 * 
-	 */
-	public void exit() {
-		System.exit(0);
-	}
+	public void start() throws CompilerException {
+		lexer.getNextToken();
+		while(lexer.endOfFile == false) {
+			System.out.println(lexer.currentToken + "&&&");
 
-	@Override
+			// this turned in to an infinite loop
+			
+			if(lexer.currentToken.length() < 1 || lexer.currentToken.isEmpty() || lexer.currentToken.equals(" ")) {
+				
+				continue;
+			}
+			else if (lexer.currentToken.charAt(0) == Tokens.ADDE || 
+					lexer.currentToken.charAt(0) == Tokens.LINKE ||
+							lexer.currentToken.charAt(0) == Tokens.PARAE || 
+									lexer.currentToken.charAt(0) == Tokens.TITLEE) {
+				throw new CompilerException("Syntax error at line # " + lexer.lineN + " & character # " + lexer.currentPosition);
+			}
+			
+			
+			else if(lexer.currentToken.charAt(0) == Tokens.VAR) {
+				variables();
+			}
+			
+			else if(lexer.currentToken.charAt(0) == Tokens.HASH) {
+				markdown();
+			}
+			
+			
+			
+			
+			else if(lexer.currentToken.charAt(0) == Tokens.HEAD) {
+				head();
+			}
+			
+			
+			
+			else if(lexer.currentToken.charAt(0) == Tokens.ITALIC) {
+				if(lexer.currentToken.equals(Tokens.BOLD)) {
+					bold();
+				}
+				else {
+					italics();
+				}
+			}
+			
+			
+			else if(lexer.currentToken.charAt(0) == Tokens.LISTB) {
+				listitem();
+			}
+			
+			else if(lexer.currentToken.charAt(0) == Tokens.AUDIO) {
+				audio();
+			}
+			
+			else if(lexer.currentToken.charAt(0) == Tokens.VIDEO) {
+				video();
+			}
+			
+			else if(lexer.currentToken.charAt(0) == Tokens.PARAB) {
+				paragraph();
+			}
+			
+			else if(lexer.currentToken.charAt(0) == Tokens.NEWLINE) {
+				newline();
+			}
+			
+			else if(lexer.currentToken.charAt(0) == Tokens.LINKB) {
+				link();
+			}
+			
+			else if(lexer.currentToken.equals("\n")) {
+				sem.newline();
+			}
+			
+			else {
+		
+			}
+			
+		lexer.getNextToken();
+			
+		}
+		//lexer.getNextToken();
+	}
+	
+
+	
+	public void variables() throws CompilerException {
+		if(lexer.currentToken.equalsIgnoreCase(Tokens.VARB)) {
+			variableDefine();
+		}
+		else if (lexer.currentToken.equalsIgnoreCase(Tokens.VARU)) {
+			variableUse();
+		}
+		else {
+			throw new CompilerException("Syntax error at line #: " + lexer.lineN);
+		}
+	}
+	
+	
 	public void markdown() throws CompilerException {
 		
 		/*
@@ -53,14 +137,44 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 		 * semantics.mardownEnd();
 		 */
 		
-		if(lex.currentToken.length() < 1 || lex.currentToken.isEmpty() || lex.currentToken.equals("")) {
-			return;
+		if(lexer.currentToken.equalsIgnoreCase(Tokens.DOCB)) {
+			mkdBegin();
 		}
-			char c = lex.currentToken.charAt(0);
-			if (c == Tokens.ADDE || c == Tokens.LINKE || c == Tokens.PARAE || c == Tokens.TITLEE) {
-				throw new CompilerException("Syntax error at line num- " + lex.lineN + " and character num- " + lex.currentPosition);
-			
-			}	
+		else {
+			mkdEnd();
+		}
+		
+		
+	}
+	public void mkdBegin() throws CompilerException {
+		
+		
+		if(lexer.currentToken.equalsIgnoreCase(Tokens.DOCB)) {
+			System.out.println("markdown begin");
+			semantics.markdownB();
+		}
+		
+		else {
+			throw new CompilerException("error" + Tokens.DOCB + " got " +
+										lexer.currentToken + " instead at line  " +
+										lexer.lineN);
+		}
+		
+		
+
+	}
+	
+	public void mkdEnd() throws CompilerException {
+		if(lexer.currentToken.equalsIgnoreCase(Tokens.DOCE)) {
+			semantics.markdownE();
+		}
+		
+		else {
+			throw new CompilerException("error expected " + Tokens.DOCE + " got " +
+										lexer.currentToken + " instead of a line- " +
+										lexer.lineN);
+		}
+
 	}
 
 	@Override
@@ -68,16 +182,16 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 		boolean x = false;
 		String h = "";
 		String t = "";
-		lex.getNextToken();
+		lexer.getNextToken();
 		
-		while(lex.currentToken.charAt(0) != Tokens.HEAD) {
+		while(lexer.currentToken.charAt(0) != Tokens.HEAD) {
 			
-			if(lex.currentToken.charAt(0) == Tokens.TITLEB) {
+			if(lexer.currentToken.charAt(0) == Tokens.TITLEB) {
 				t = title();
 			}
 			
 			else {
-				h += lex.currentToken + " ";
+				h += lexer.currentToken + " ";
 			}
 		}
 		
@@ -97,9 +211,9 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 		
 		String t = "";
 		
-		lex.getNextToken();
-		while(lex.currentToken.charAt(0) != (Tokens.TITLEE)) {
-			t += lex.currentToken;
+		lexer.getNextToken();
+		while(lexer.currentToken.charAt(0) != (Tokens.TITLEE)) {
+			t += lexer.currentToken;
 		}
 		
 		return t;
@@ -118,28 +232,28 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 		
 		sem.addParaB();
 		
-		lex.getNextToken();
+		lexer.getNextToken();
 		
 		
-		while (!lex.currentToken.equals(Tokens.PARAE)) {
-			if(lex.currentToken.equals(Tokens.PARAB)) {
+		while (!lexer.currentToken.equals(Tokens.PARAE)) {
+			if(lexer.currentToken.equals(Tokens.PARAB)) {
 				throw new CompilerException("Syntax error expected " + Tokens.PARAE + " got " +
-						lex.currentToken + " instead at line " +
-						lex.lineN);
+						lexer.currentToken + " instead at line " +
+						lexer.lineN);
 			}
 			
-			else if(lex.currentToken.length() < 1 || lex.currentToken.isEmpty() || lex.currentToken.equals("")) {
-				lex.getNextToken();
+			else if(lexer.currentToken.length() < 1 || lexer.currentToken.isEmpty() || lexer.currentToken.equals("")) {
+				lexer.getNextToken();
 				continue;
 			}
 			
 			
-			else if(lex.currentToken.charAt(0) == Tokens.VAR) {
-				if(lex.currentToken.equals(Tokens.VARU)) {
+			else if(lexer.currentToken.charAt(0) == Tokens.VAR) {
+				if(lexer.currentToken.equals(Tokens.VARU)) {
 					variableUse();
 				}
 				
-				if(lex.currentToken.equals(Tokens.VARB)) {
+				if(lexer.currentToken.equals(Tokens.VARB)) {
 					variableDefine();
 					
 					count++;
@@ -148,12 +262,12 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 				
 			}
 			
-			else if (lex.currentToken.equals(Tokens.NEWLINE)) {
+			else if (lexer.currentToken.equals(Tokens.NEWLINE)) {
 				newline();
 			}
 			
-			else if(lex.currentToken.charAt(0) == Tokens.ITALIC) {
-				if(lex.currentToken.equals(Tokens.BOLD)) {
+			else if(lexer.currentToken.charAt(0) == Tokens.ITALIC) {
+				if(lexer.currentToken.equals(Tokens.BOLD)) {
 					bold();
 				}
 				else {
@@ -161,23 +275,23 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 				}
 			}
 			
-			else if(lex.currentToken.charAt(0) == Tokens.LISTB) {
+			else if(lexer.currentToken.charAt(0) == Tokens.LISTB) {
 				listitem();
 			}
 			
-			else if(lex.currentToken.charAt(0) == Tokens.AUDIO) {
+			else if(lexer.currentToken.charAt(0) == Tokens.AUDIO) {
 				audio();
 			}
 			
-			else if(lex.currentToken.charAt(0) == Tokens.VIDEO) {
+			else if(lexer.currentToken.charAt(0) == Tokens.VIDEO) {
 				video();
 			}
 			
-			else if(lex.currentToken.charAt(0) == Tokens.LINKB) {
+			else if(lexer.currentToken.charAt(0) == Tokens.LINKB) {
 				link();
 			}
 		
-			else if(lex.currentToken.equals("\n")) {
+			else if(lexer.currentToken.equals("\n")) {
 				sem.newline();
 			}
 			
@@ -185,7 +299,7 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 				innerText();
 			}
 			
-			lex.getNextToken();
+			lexer.getNextToken();
 		}
 		
 		for(int i = 0; i < count; i++) {
@@ -207,60 +321,60 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 		String name;
 		String value;
 		
-		lex.getNextToken();
+		lexer.getNextToken();
 		
-		name = lex.currentToken;
+		name = lexer.currentToken;
 		
-		lex.getNextToken(); 
+		lexer.getNextToken(); 
 		
-		if(lex.currentToken.charAt(0) != Tokens.EQSIGN) {
+		if(lexer.currentToken.charAt(0) != Tokens.EQSIGN) {
 			throw new CompilerException("Syntax error expected " + Tokens.EQSIGN + " got " +
-					lex.currentToken + " instead at line " +
-					lex.lineN);
+					lexer.currentToken + " instead at line " +
+					lexer.lineN);
 		}
 		else {
-			lex.getNextToken(); 
+			lexer.getNextToken(); 
 			
 			
-			value = lex.currentToken;
+			value = lexer.currentToken;
 			String[] s = {name, value};
 			myStack.add(s);
 		}
 		
-		lex.getNextToken();
+		lexer.getNextToken();
 		
-		if(!lex.currentToken.equalsIgnoreCase(Tokens.VARE)) {
+		if(!lexer.currentToken.equalsIgnoreCase(Tokens.VARE)) {
 			throw new CompilerException("Expected " + Tokens.VARE + " got " +
-					lex.currentToken + " instead at line " +
-					lex.lineN);
+					lexer.currentToken + " instead at line " +
+					lexer.lineN);
 		}
 		
 	}
 
 	@Override
 	public void variableUse() throws CompilerException {
-		lex.getNextToken(); // should be the variable name
+		lexer.getNextToken(); // should be the variable name
 		
-		if(myStack.contains(lex.currentToken)) {
-			String value = myStack.search(lex.currentToken);
+		if(myStack.contains(lexer.currentToken)) {
+			String value = myStack.search(lexer.currentToken);
 			
-			lex.getNextToken(); // should be the variable end token $end
+			lexer.getNextToken(); // should be the variable end token $end
 			
-			if(!(lex.currentToken.equals(Tokens.VARE))) {
+			if(!(lexer.currentToken.equals(Tokens.VARE))) {
 				throw new CompilerException("Syntax error, expected " + Tokens.VARE + " got " +
-						lex.currentToken + " instead at line " +
-						lex.lineN);
+						lexer.currentToken + " instead at line " +
+						lexer.lineN);
 			}
 			
 			else {
-				sem.innerText(lex.currentToken);
+				sem.innerText(lexer.currentToken);
 			}
 			
 			
 		}
 		else {
-			throw new CompilerException("Semantic error variable '" + lex.currentToken + "' is not defined at" +
-							" line # " + lex.lineN);
+			throw new CompilerException("Semantic error variable '" + lexer.currentToken + "' is not defined at" +
+							" line # " + lexer.lineN);
 		}
 		
 
@@ -272,12 +386,12 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 	public void bold() throws CompilerException {
 		String bld = "";
 		
-		lex.getNextToken();
+		lexer.getNextToken();
 		
-		bld.concat(lex.currentToken).concat(" ");
+		bld.concat(lexer.currentToken).concat(" ");
 		
-		while(!(lex.currentToken.equals(Tokens.BOLD))){
-			lex.getNextToken();
+		while(!(lexer.currentToken.equals(Tokens.BOLD))){
+			lexer.getNextToken();
 		}
 		
 	sem.bold(bld);	
@@ -287,15 +401,15 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 	public void italics() throws CompilerException {
 		String itl = "";
         
-        lex.getNextToken();
+        lexer.getNextToken();
         
-        itl.concat(lex.currentToken).concat(" ");
+        itl.concat(lexer.currentToken).concat(" ");
         
-        while(!(lex.currentToken.equals(Tokens.ITALIC))) {
-        	lex.getNextToken();
+        while(!(lexer.currentToken.equals(Tokens.ITALIC))) {
+        	lexer.getNextToken();
         	
-        	if(!(lex.currentToken.equals(Tokens.ITALIC))) {
-        		itl.concat(lex.currentToken).concat(" ");
+        	if(!(lexer.currentToken.equals(Tokens.ITALIC))) {
+        		itl.concat(lexer.currentToken).concat(" ");
         	}
         }
         
@@ -305,57 +419,57 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 
 	@Override
 	public void listitem() throws CompilerException {
-		lex.getNextToken();
+		lexer.getNextToken();
 		
-		String b = lex.currentToken.concat(" ");
+		String b = lexer.currentToken.concat(" ");
 
-		while (!lex.currentToken.equals(Tokens.LISTE)) {
+		while (!lexer.currentToken.equals(Tokens.LISTE)) {
 			
 			
-			lex.getNextToken(); 
-			if(lex.currentToken.length() < 1 || lex.currentToken.isEmpty() || lex.currentToken.equals("")) {
-				lex.getNextToken();
+			lexer.getNextToken(); 
+			if(lexer.currentToken.length() < 1 || lexer.currentToken.isEmpty() || lexer.currentToken.equals("")) {
+				lexer.getNextToken();
 				continue;
 			}
-			else if(lex.currentToken.charAt(0) == Tokens.VAR) {
+			else if(lexer.currentToken.charAt(0) == Tokens.VAR) {
 				
-				if(lex.currentToken.equalsIgnoreCase(Tokens.VARB)) {
-					throw new CompilerException("Syntax error " + lex.currentToken + 
+				if(lexer.currentToken.equalsIgnoreCase(Tokens.VARB)) {
+					throw new CompilerException("Syntax error " + lexer.currentToken + 
 							" at line " +
-							lex.lineN);
+							lexer.lineN);
 				}
 				else {
-					if(lex.currentToken.equalsIgnoreCase(Tokens.VARU)) {
-						lex.getNextToken();
-						if(myStack.contains(lex.currentToken)) {
-							b.concat(myStack.search(lex.currentToken)).concat(" ");
+					if(lexer.currentToken.equalsIgnoreCase(Tokens.VARU)) {
+						lexer.getNextToken();
+						if(myStack.contains(lexer.currentToken)) {
+							b.concat(myStack.search(lexer.currentToken)).concat(" ");
 						}
 						else {
-							throw new CompilerException("Semantic error variable '" + lex.currentToken + "' is not defined at" +
-									" line num- " + lex.lineN);
+							throw new CompilerException("Semantic error variable '" + lexer.currentToken + "' is not defined at" +
+									" line num- " + lexer.lineN);
 						}
 					}
 					
-					if(lex.currentToken.equalsIgnoreCase(Tokens.VARE)) {
+					if(lexer.currentToken.equalsIgnoreCase(Tokens.VARE)) {
 						continue;
 					}
 				}
-			lex.getNextToken();
+			lexer.getNextToken();
 			}
-			else if(lex.currentToken.charAt(0) == Tokens.ADDE || 
-					lex.currentToken.charAt(0) == Tokens.LINKE || 
-					lex.currentToken.charAt(0) == Tokens.PARAE || 
-					lex.currentToken.charAt(0) == Tokens.TITLEE ||
-					lex.currentToken.charAt(0) == Tokens.LINKB || 
-					lex.currentToken.charAt(0) == Tokens.PARAB ||
-					lex.currentToken.charAt(0) == Tokens.ADDB || 
-					lex.currentToken.charAt(0) == Tokens.TITLEB  )
+			else if(lexer.currentToken.charAt(0) == Tokens.ADDE || 
+					lexer.currentToken.charAt(0) == Tokens.LINKE || 
+					lexer.currentToken.charAt(0) == Tokens.PARAE || 
+					lexer.currentToken.charAt(0) == Tokens.TITLEE ||
+					lexer.currentToken.charAt(0) == Tokens.LINKB || 
+					lexer.currentToken.charAt(0) == Tokens.PARAB ||
+					lexer.currentToken.charAt(0) == Tokens.ADDB || 
+					lexer.currentToken.charAt(0) == Tokens.TITLEB  )
 				
 				throw new CompilerException("Syntax error '" + 
-						lex.currentToken + "' at line " +
-						lex.lineN);
-			else if(lex.currentToken.charAt(0) != Tokens.LISTE && lex.currentToken.charAt(0) != Tokens.VAR) {
-				b.concat(lex.currentToken).concat(" ");
+						lexer.currentToken + "' at line " +
+						lexer.lineN);
+			else if(lexer.currentToken.charAt(0) != Tokens.LISTE && lexer.currentToken.charAt(0) != Tokens.VAR) {
+				b.concat(lexer.currentToken).concat(" ");
 			}
 			
 			
@@ -382,19 +496,19 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 	@Override
 	public void audio() throws CompilerException {
 
-		String curA = lex.currentToken;
+		String curA = lexer.currentToken;
 		
 		//to check there is ( and ends with ) after @
 		if(curA.charAt(1) != Tokens.ADDB) { 
 			throw new CompilerException("Expected token was " + Tokens.ADDB + " however, got " +
-					lex.currentToken + ". -line " +
-					lex.lineN);
+					lexer.currentToken + ". -line " +
+					lexer.lineN);
 		}
 		
 		else if(curA.charAt(curA.length() - 1 ) != Tokens.ADDE) { 
 			throw new CompilerException("Expected token was " + Tokens.ADDE + " however, got " +
-					lex.currentToken + ". -line " +
-					lex.lineN);
+					lexer.currentToken + ". -line " +
+					lexer.lineN);
 		}
 		
 		else  {
@@ -406,19 +520,19 @@ public class MySyntaxAnalyzer implements SyntaxAnalyzer {
 
 	@Override
 	public void video() throws CompilerException {
-String curV = lex.currentToken;
+String curV = lexer.currentToken;
 
 		//to check there is  ( and ends with ) after %
 		if(curV.charAt(1) != Tokens.ADDB) { 
 			throw new CompilerException("Expected token was " + Tokens.ADDB + " however, got " +
-					lex.currentToken + ". -line " +
-					lex.lineN);
+					lexer.currentToken + ". -line " +
+					lexer.lineN);
 		}
 		
 		else if(curV.charAt(curV.length() - 1 ) != Tokens.ADDE) { 
 			throw new CompilerException("Expected token was " + Tokens.ADDE + " however, got " +
-					lex.currentToken + ". -line " +
-					lex.lineN);
+					lexer.currentToken + ". -line " +
+					lexer.lineN);
 		}
 		
 		else  {

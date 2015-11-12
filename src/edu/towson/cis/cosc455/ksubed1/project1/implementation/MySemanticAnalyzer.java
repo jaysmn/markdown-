@@ -33,14 +33,14 @@ public class MySemanticAnalyzer {
 		this.fileName = fileName;
 	}
 	
-	public void mardownB() {
+	public void markdownB() {
 		// add this to queue "<HTML>\n";
-		myQueue.add("<HTML>\n");
+		myQueue.add("<html>\n");
 		
 		
 	}
 	
-	public void mardownE() {
+	public void markdownE() {
 		// add this to queue "<\HTML>\n";
 		myQueue.add("</HTML>");
 		createFile();

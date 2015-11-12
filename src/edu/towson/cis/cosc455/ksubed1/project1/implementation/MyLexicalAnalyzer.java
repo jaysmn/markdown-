@@ -14,7 +14,7 @@ public class MyLexicalAnalyzer implements LexicalAnalyzer {
 	
 	public int charNum = 0;
 	
-	public String currentToken;
+	public String currentToken = "";
 	
 	public boolean endOfFile = false;
 	public boolean endOfLine = true;
@@ -51,25 +51,36 @@ public class MyLexicalAnalyzer implements LexicalAnalyzer {
 	
 	@Override
 	public void getNextToken() {
+		currentToken = " ";
 		if(endOfLine) {
 			nextLine();
 		}
 		
-		if(isSpace(lineS.charAt(charNum))) {
-			skipSpace();
+		if(charNum < lineS.length()) {
+			if(isSpace(lineS.charAt(charNum))) {
+				skipSpace();
+				
+			}
 			
+			while(!(isSpace(lineS.charAt(charNum)))) {
+				getCharacter();
+				addCharacter();
+				
+			}
+			
+			if(!lookupToken()) {
+				System.out.println("Lexical Error at " + lineN);
+				System.exit(0);
+			}
+			
+			System.out.println(currentToken + " current token");
 		}
 		
-		while(!isSpace(lineS.charAt(charNum))) {
-			getCharacter();
-			addCharacter();
-			
+		else {
+			endOfLine = true;
+			getNextToken();
 		}
 		
-		if(!lookupToken()) {
-			System.out.println("Error at " + lineN);
-			System.exit(0);
-		}
 		
 
 	}
@@ -107,7 +118,7 @@ public class MyLexicalAnalyzer implements LexicalAnalyzer {
 
 	@Override
 	public boolean lookupToken() {
-		boolean b = false;
+		boolean b = true;
 		
 		char c = currentToken.charAt(0);
 		
